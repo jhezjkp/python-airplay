@@ -1,5 +1,6 @@
 import os
 import time
+import sys
 import traceback
 
 from airplay import AirPlay
@@ -21,7 +22,7 @@ def get_airplay_device(hostport):
     devices = AirPlay.find(fast=True)
 
     if len(devices) == 0:
-        raise RuntimeError('No AirPlay devices were found.  Use --device to manually specify an device.')
+        return None
     elif len(devices) == 1:
         return devices[0]
     elif len(devices) > 1:
@@ -65,14 +66,16 @@ def photo(path):
 @click.option('-d', '--dev', '--device', metavar="<host/ip>[:<port>]")
 def video(path, position, device):
     """AirPlay a video"""
-    # click.echo("yes")
-    # if device:
-    #     click.echo("device:%s" % device)
     #connect to the AirPlay device we want to control
+    ap = None
     try:
         ap = get_airplay_device(device)
     except (ValueError, RuntimeError) as exc:
         traceback.print_exc()
+
+    if not ap:
+        click.secho("No AirPlay devices found in your network!", fg="red", err=True)
+        sys.exit(-1)
 
     duration = 0
     state = 'loading'
