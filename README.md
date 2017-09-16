@@ -14,35 +14,41 @@ This package is not on PyPI (yet) so install from this repo:
 
 Easy!
 
+    # discover airplay devices
+    $ airplay discover
+    
+    # send a local photo
+    $ airplay photo ~/image.jpg
+    # send a internet photo and display for 5 seconds
+    $ airplay photo http://www.beihaiting.com/uploads/allimg/150401/10723-150401193I54I.jpg -t 5
+    
+    # screen cast(without audio yet) for 120 seconds
+    # for linux like debian/ubuntu: sudo apt-get install scrot
+    $ airplay screen -t 120
+    
     # play a remote video file
     $ airplay http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4
-
+    
     # play a remote video file, but start it half way through
     $ airplay -p 0.5 http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4
-
+    
     # play a local video file
     $ airplay /path/to/some/local/file.mp4
-
+    
     # or play to a specific device
     $ airplay --device 192.0.2.23:7000 http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4
-
+    
     $ airplay --help
-    usage: airplay [-h] [--position POSITION] [--device DEVICE] path
-
-    Playback a local or remote video file via AirPlay. This does not do any on-
-    the-fly transcoding (yet), so the file must already be suitable for the
-    AirPlay device.
-
-    positional arguments:
-      path                  An absolute path or URL to a video file
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      --position POSITION, --pos POSITION, -p POSITION
-                            Where to being playback [0.0-1.0]
-      --device DEVICE, --dev DEVICE, -d DEVICE
-                            Playback video to a specific device
-                            [<host/ip>:(<port>)]
+    Usage: airplay [OPTIONS] COMMAND [ARGS]...
+    
+    Options:
+      --help  Show this message and exit.
+    
+    Commands:
+      discover  Discover AirPlay devices in connected network
+      photo     AirPlay a photo
+      screen    AirPlay screen cast(without voice yet)
+      video     AirPlay a video  
 
 
 
@@ -52,55 +58,55 @@ Awesome!  This package is compatible with Python >= 2.7 (including Python 3!)
 
     # Import the AirPlay class
     >>> from airplay import AirPlay
-
+    
     # If you have zeroconf installed, the find() classmethod will locate devices for you
     >>> AirPlay.find(fast=True)
     [<airplay.airplay.AirPlay object at 0x1005d9a90>]
-
+    
     # or you can manually specify a host/ip and optionally a port
     >>> ap = AirPlay('192.0.2.23')
     >>> ap = AirPlay('192.0.2.3', 7000)
-
+    
     # Query the device
     >>> ap.server_info()
     {'protovers': '1.0', 'deviceid': 'FF:FF:FF:FF:FF:FF', 'features': 955001077751, 'srcvers': '268.1', 'vv': 2, 'osBuildVersion': '13U717', 'model': 'AppleTV5,3', 'macAddress': 'FF:FF:FF:FF:FF:FF'}
-
+    
     # Play a video
     >>> ap.play('http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4')
     True
-
+    
     # Get detailed playback information
     >>> ap.playback_info()
     {'duration': 60.095, 'playbackLikelyToKeepUp': True, 'readyToPlayMs': 0, 'rate': 1.0, 'playbackBufferEmpty': True, 'playbackBufferFull': False, 'loadedTimeRanges': [{'start': 0.0, 'duration': 60.095}], 'seekableTimeRanges': [{'start': 0.0, 'duration': 60.095}], 'readyToPlay': 1, 'position': 4.144803403}
-
+    
     # Get just the playhead position
     >>> ap.scrub()
     {'duration': 60.095001, 'position': 12.465443}
-
+    
     # Seek to an absolute position
     >>> ap.scrub(30)
     {'duration': 60.095001, 'position': 30.0}
-
+    
     # Pause playback
     >>> ap.rate(0.0)
     True
-
+    
     # Resume playback
     >>> ap.rate(1.0)
     True
- 
+     
     # Stop playback completely
     >>> ap.stop()
     True
-
+    
     # Start a webserver to stream a local file to an AirPlay device
     >>> ap.serve('/tmp/home_movie.mp4')
     'http://192.0.2.114:51058/home_movie.mp4'
-
+    
     # Playback the generated URL
     >>> ap.play('http://192.0.2.114:51058/home_movie.mp4')
     True
-
+    
     # Read events from a generator as the device emits them
     >>> for event in ap.events():
     ...   print(event)
@@ -144,7 +150,7 @@ Discover AirPlay devices using Zeroconf/Bonjour
 
 #### Arguments
 * **timeout (int):** The number of seconds to wait for responses. If fast is False, then this function will always block for this number of seconds.
-            
+
 * **fast (bool):**    If True, do not wait for timeout to expire return as soon as we've found at least one AirPlay device.
 
 #### Returns
@@ -218,7 +224,7 @@ Return the current playback position, optionally seek to a specific position
 
     >>> ap.scrub()
     {'duration': 60.095001, 'position': 12.465443}
-
+    
     >>> ap.scrub(30)
     {'duration': 60.095001, 'position': 30.0}
 
