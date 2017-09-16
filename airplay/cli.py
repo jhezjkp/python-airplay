@@ -47,11 +47,11 @@ def humanize_seconds(secs):
 
 
 @click.group()
-def cli():
+def main():
     pass
 
 
-@cli.command()
+@main.command()
 def discover():
     """Discover AirPlay devices in connected network"""
     click.echo("AirPlay device discover start...")
@@ -64,7 +64,7 @@ def discover():
             click.echo("\t %s\t %s:%s\n" % (dd.name, dd.host, dd.port))
 
 
-@cli.command()
+@main.command()
 @click.option('-t', '--time', 'duration', metavar='<time>', type=int, default=10, help='display duration(seconds)')
 @click.option('-d', '--dev', '--device', metavar='<host/ip>[:<port>]')
 @click.argument('path', metavar='<path/url>')
@@ -97,7 +97,7 @@ def photo(path, device, duration):
         ap.stop()
 
 
-@cli.command()
+@main.command()
 @click.option('-t', '--time', 'duration', metavar='<time>', type=click.IntRange(10, 999999, clamp=True), default=60, help='screen cast duration(seconds)')
 @click.option('-d', '--dev', '--device', metavar='<host/ip>[:<port>]')
 def screen(duration, device):
@@ -134,7 +134,7 @@ def screen(duration, device):
     ap.stop()
 
 
-@cli.command()
+@main.command()
 @click.argument('path', metavar='<path/url>')
 @click.option('-p', '--pos', '--position', metavar="<position>", default=0, type=float)
 @click.option('-d', '--dev', '--device', metavar="<host/ip>[:<port>]")
@@ -208,4 +208,4 @@ def video(path, position, device):
 
 
 if __name__ == '__main__':
-    cli()
+    main()
