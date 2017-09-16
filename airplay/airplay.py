@@ -4,6 +4,7 @@ import os
 import socket
 import time
 import warnings
+import traceback
 
 from multiprocessing import Process, Queue
 
@@ -84,7 +85,13 @@ class AirPlayEvent(BaseHTTPRequestHandler):
             raise RuntimeError('Received an event with a zero length body.')
 
         # parse XML plist
-        self.event = plist_loads(self.rfile.read(content_length))
+        xml = self.rfile.read(content_length)
+        if len(xml) < content_length:
+            # sometimes the content is not complete...
+            self.event = plist_loads(xml+"</dict></plist>")
+        else:
+            self.event = plist_loads(xml)
+
 
 
 class AirPlay(object):
@@ -190,7 +197,8 @@ class AirPlay(object):
                 event_socket.send(b"HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n")
 
                 # skip non-video events
-                if req.event.get('category', None) != 'video':
+                if not hasattr(req, 'event') or req.event is None or \
+                    req.event.get('category', None) != 'video':
                     continue
 
                 # send the event back to the parent process
@@ -199,6 +207,7 @@ class AirPlay(object):
         except KeyboardInterrupt:
             return
         except Exception as exc:
+            traceback.print_exc()
             event_queue.put(exc)
             return
 
