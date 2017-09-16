@@ -1,6 +1,6 @@
-import argparse
 import os
 import time
+import traceback
 
 from airplay import AirPlay
 
@@ -41,55 +41,48 @@ def humanize_seconds(secs):
     return "%02d:%02d:%02d" % (h, m, s)
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Playback a local or remote video file via AirPlay. "
-                    "This does not do any on-the-fly transcoding (yet), "
-                    "so the file must already be suitable for the AirPlay device."
-    )
+@click.group()
+def cli():
+    pass
 
-    parser.add_argument(
-        'path',
-        help='An absolute path or URL to a video file'
-    )
 
-    parser.add_argument(
-        '--position',
-        '--pos',
-        '-p',
-        default=0.0,
-        type=float,
-        help='Where to being playback [0.0-1.0]'
-    )
+@cli.command()
+def discover(path):
+    """Discover AirPlay devices in connected network"""
+    click.echo("hello, discover!")
 
-    parser.add_argument(
-        '--device',
-        '--dev',
-        '-d',
-        default=None,
-        help='Playback video to a specific device [<host/ip>:(<port>)]'
-    )
 
-    args = parser.parse_args()
+@cli.command()
+@click.argument('path', metavar='<path/url>')
+def photo(path):
+    """AirPlay a photo"""
+    click.echo("hello, photo!")
 
-    # connect to the AirPlay device we want to control
+
+@cli.command()
+@click.argument('path', metavar='<path/url>')
+@click.option('-p', '--pos', '--position', metavar="<position>", default=0, type=float)
+@click.option('-d', '--dev', '--device', metavar="<host/ip>[:<port>]")
+def video(path, position, device):
+    """AirPlay a video"""
+    # click.echo("yes")
+    # if device:
+    #     click.echo("device:%s" % device)
+    #connect to the AirPlay device we want to control
     try:
-        ap = get_airplay_device(args.device)
+        ap = get_airplay_device(device)
     except (ValueError, RuntimeError) as exc:
-        parser.error(exc)
+        traceback.print_exc()
 
     duration = 0
-    position = 0
     state = 'loading'
-
-    path = args.path
 
     # if the url is on our local disk, then we need to spin up a server to start it
     if os.path.exists(path):
         path = ap.serve(path)
 
     # play what they asked
-    ap.play(path, args.position)
+    ap.play(path, position)
 
     # stay in this loop until we exit
     with click.progressbar(length=100, show_eta=False) as bar:
@@ -138,4 +131,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    cli()
