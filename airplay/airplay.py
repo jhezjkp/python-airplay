@@ -254,12 +254,13 @@ class AirPlay(object):
             except Empty:
                 return
 
-    def _command(self, uri, method='GET', body='', **kwargs):
+    def _command(self, uri, method='GET', header={}, body='', **kwargs):
         """Makes an HTTP request through to an AirPlay server
 
         Args:
             uri(string):    The URI to request
             method(string): The HTTP verb to use when requesting `uri`, defaults to GET
+            header(dict):   The header to be send with the request
             body(string):   If provided, will be sent witout alteration as the request body.
                             Content-Length header will be set to len(`body`)
             **kwargs:       If provided, Will be converted to a query string and appended to `uri`
@@ -274,8 +275,12 @@ class AirPlay(object):
         # generate the request
         if len(kwargs):
             uri = uri + '?' + urlencode(kwargs)
-
-        request = method + " " + uri + " HTTP/1.1\r\nContent-Length: " + str(len(body)) + "\r\n\r\n" + body
+        # request = method + " " + uri + " HTTP/1.1\r\nContent-Length: " + str(len(body)) + "\r\n\r\n" + body
+        header['Content-Length'] = str(len(body))
+        sheader = ""
+        for key, value in header.items():
+            sheader += key + ": " + value + "\r\n"
+        request = method + " " + uri + " HTTP/1.1\r\n" + sheader + "\r\n" + body
 
         try:
             request = bytes(request, 'UTF-8')
@@ -283,7 +288,7 @@ class AirPlay(object):
             pass
 
         # send it
-        self.control_socket.send(request)
+        self.control_socket.sendall(request)
 
         # parse our response
         result = self.control_socket.recv(self.RECV_SIZE)
@@ -351,7 +356,31 @@ class AirPlay(object):
         return self._command(
             '/play',
             'POST',
-            "Content-Location: {0}\nStart-Position: {1}\n\n".format(url, float(position))
+            body="Content-Location: {0}\nStart-Position: {1}\n\n".format(url, float(position))
+        )
+
+    def photo(self, img):
+        """Start a photo display
+
+        Args:
+            url(string):    A URL to video content that the AirPlay server is capable of playing
+            pos(float):     The position in the content to being playback. 0.0 = start, 1.0 = end.
+
+        Returns:
+            bool: The request was accepted.
+
+        """
+        header = {
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+            "Connection": "keep-alive",
+            "Content-Type": "application/octet-stream"
+        }
+        return self._command(
+            '/photo',
+            'PUT',
+            header,
+            img
         )
 
     def rate(self, rate):

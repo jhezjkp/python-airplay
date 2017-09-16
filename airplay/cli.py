@@ -1,7 +1,9 @@
 import os
+import os.path
 import time
 import sys
 import traceback
+import urllib
 
 from airplay import AirPlay
 
@@ -61,10 +63,36 @@ def discover():
 
 
 @cli.command()
+@click.option('-t', '--time', 'duration', metavar='<time>', type=int, default=10, help='display duration(seconds)')
+@click.option('-d', '--dev', '--device', metavar='<host/ip>[:<port>]')
 @click.argument('path', metavar='<path/url>')
-def photo(path):
+def photo(path, device, duration):
     """AirPlay a photo"""
-    click.echo("hello, photo!")
+    data = None
+    if path.startswith('http'):
+        data = urllib.urlopen(path).read()
+    elif os.path.exists(path) and os.path.isfile(path):
+        data = open(path, 'r').read()
+
+    if data is None:
+        click.secho("photo not exists!", fg="red", err=True)
+        sys.exit(-1)
+    ap = None
+    try:
+        ap = get_airplay_device(device)
+    except (ValueError, RuntimeError) as exc:
+        traceback.print_exc()
+
+    if not ap:
+        click.secho("No AirPlay devices found in your network!", fg="red", err=True)
+        sys.exit(-1)
+
+    ap.photo(data)
+    if time >0:
+        with click.progressbar(range(0, duration)) as bar:
+            for i in bar:
+                time.sleep(1)
+        ap.stop()
 
 
 @cli.command()
