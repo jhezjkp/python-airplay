@@ -288,7 +288,7 @@ class AirPlay(object):
             pass
 
         # send it
-        self.control_socket.sendall(request)
+        self.control_socket.send(request)
 
         # parse our response
         result = self.control_socket.recv(self.RECV_SIZE)
