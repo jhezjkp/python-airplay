@@ -33,6 +33,7 @@ setup(
     install_requires=[
         'zeroconf',
         'click',
+        'Pillow',
     ],
 
     tests_require=[

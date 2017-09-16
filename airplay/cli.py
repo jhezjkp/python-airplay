@@ -1,9 +1,11 @@
 import os
 import os.path
+import platform
 import time
 import sys
 import traceback
 import urllib
+import tempfile
 
 from airplay import AirPlay
 
@@ -93,6 +95,43 @@ def photo(path, device, duration):
             for i in bar:
                 time.sleep(1)
         ap.stop()
+
+
+@cli.command()
+@click.option('-t', '--time', 'duration', metavar='<time>', type=click.IntRange(10, 999999, clamp=True), default=60, help='screen cast duration(seconds)')
+@click.option('-d', '--dev', '--device', metavar='<host/ip>[:<port>]')
+def screen(duration, device):
+    """AirPlay screen cast(without voice yet)"""
+    is_linux = False
+    sysstr = platform.system()
+    if(sysstr == "Linux"):
+        is_linux = True
+    else:
+        from PIL import ImageGrab
+    ap = None
+    try:
+        ap = get_airplay_device(device)
+    except (ValueError, RuntimeError) as exc:
+        traceback.print_exc()
+
+    if not ap:
+        click.secho("No AirPlay devices found in your network!", fg="red", err=True)
+        sys.exit(-1)
+
+    path = tempfile.gettempdir()
+    #scrot screen.png
+    fn = os.path.join(path, "screen.png")
+    start = round(time.time())
+    while round(time.time()) - start < duration:
+        if is_linux:
+            os.system('scrot -z ' + fn)
+        else:
+            ImageGrab.grab().save(fn, "png")
+        
+        data = open(fn, 'r').read()
+
+        ap.photo(data)
+    ap.stop()
 
 
 @cli.command()
