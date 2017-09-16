@@ -27,16 +27,16 @@ Easy!
     $ airplay screen -t 120
     
     # play a remote video file
-    $ airplay http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4
+    $ airplay video http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4
     
     # play a remote video file, but start it half way through
-    $ airplay -p 0.5 http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4
+    $ airplay video -p 0.5 http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4
     
     # play a local video file
-    $ airplay /path/to/some/local/file.mp4
+    $ airplay video /path/to/some/local/file.mp4
     
     # or play to a specific device
-    $ airplay --device 192.0.2.23:7000 http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4
+    $ airplay video --device 192.0.2.23:7000 http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4
     
     $ airplay --help
     Usage: airplay [OPTIONS] COMMAND [ARGS]...
