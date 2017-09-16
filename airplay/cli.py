@@ -48,9 +48,16 @@ def cli():
 
 
 @cli.command()
-def discover(path):
+def discover():
     """Discover AirPlay devices in connected network"""
-    click.echo("hello, discover!")
+    click.echo("AirPlay device discover start...")
+    devices = AirPlay.find(fast=True)
+    if not devices or len(devices) == 0:
+        click.echo("There's no AirPlay device in your network.")
+    else:
+        click.echo("AirPlay device discover complete!")
+        for dd in devices:
+            click.echo("\t %s\t %s:%s\n" % (dd.name, dd.host, dd.port))
 
 
 @cli.command()
