@@ -180,7 +180,7 @@ class AirPlay(object):
                 # parse it
                 try:
                     req = AirPlayEvent(FakeSocket(raw_request), event_socket.getpeername(), None)
-                except RuntimeError as exc:
+                except Exception as exc:
                     raise RuntimeError(
                         "Unexpected request from AirPlay while processing events\n"
                         "Error: {0}\nReceived:\n{1}".format(exc, raw_request)
