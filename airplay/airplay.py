@@ -363,8 +363,7 @@ class AirPlay(object):
         """Start a photo display
 
         Args:
-            url(string):    A URL to video content that the AirPlay server is capable of playing
-            pos(float):     The position in the content to being playback. 0.0 = start, 1.0 = end.
+            img(bytes):    image data
 
         Returns:
             bool: The request was accepted.
